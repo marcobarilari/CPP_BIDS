@@ -89,7 +89,7 @@ end
 [~, ~, ~] = mkdir(expParameters.outputDir);
 [~, ~, ~] = mkdir(fullfile(expParameters.outputDir, modality));
 
-if cfg,'eyeTracker'
+if cfg.eyeTracker
     [~, ~, ~] = mkdir(fullfile(expParameters.outputDir, 'eyetracker'));
 end
 
@@ -114,7 +114,7 @@ switch modality
 
 end
 
-if cfg,'eyeTracker'
+if cfg.eyeTracker
 
     expParameters.fileName.eyetracker = ...
         [expParameters.fileName.base, expParameters.acqSuffix, ...
