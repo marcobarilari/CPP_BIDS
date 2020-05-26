@@ -1,4 +1,4 @@
-function expParameters = checkCFG(expParameters)
+function expParameters = checkCFG(cfg, expParameters)
 % check that we have all the fields that we need in the experiment
 % parameters
 
@@ -23,6 +23,18 @@ for iField = 1:numel(fields2Check)
         expParameters = setfield(expParameters, fields2Check{iField}, []); %#ok<SFLD>
     end
 end
+
+% set false values for a series of field if they have not been specified
+fields2CheckFalse = { ...
+    'eyeTracker', ...
+    };
+
+for iField = 1:numel(fields2Check)
+    if ~isfield(expParameters, fields2Check{iField})
+        cfg = setfield(cfg, fields2CheckFalse{iField}, false); %#ok<SFLD>
+    end
+end
+
 
 
 end
