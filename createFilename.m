@@ -92,7 +92,7 @@ end
 [~, ~, ~] = mkdir(expParameters.outputDir);
 [~, ~, ~] = mkdir(fullfile(expParameters.outputDir, modality));
 
-if isfield(cfg,'eyeTracker')
+if cfg,'eyeTracker'
     [~, ~, ~] = mkdir(fullfile(expParameters.outputDir, 'eyetracker'));
 end
 
@@ -100,9 +100,9 @@ end
 %% create filenames
 
 switch modality
-    
+
     case 'beh'
-        
+
         expParameters.fileName.events = ...
             [expParameters.fileName.base, runSuffix, '_events_date-' expParameters.date '.tsv'];
         
@@ -110,7 +110,7 @@ switch modality
             [expParameters.fileName.base, runSuffix, '_stim_date-' expParameters.date '.tsv'];
         
     case 'func'
-        
+
         expParameters.fileName.events = ...
             [expParameters.fileName.base, ...
             expParameters.acqSuffix, expParameters.ceSuffix, ...
@@ -132,7 +132,7 @@ if cfg.eyeTracker
     expParameters.fileName.eyetracker = ...
         [expParameters.fileName.base, expParameters.acqSuffix, ...
         runSuffix, '_eyetrack_date-' expParameters.date '.edf'];
-    
+
 end
 
 if expParameters.verbose
