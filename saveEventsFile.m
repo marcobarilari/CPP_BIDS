@@ -12,8 +12,11 @@ switch input
         
         % Initialize txt logfiles and empty fields for the standard BIDS
         %  event file
-        logFile.eventLogFile = fopen(...
-            fullfile(expParameters.outputDir, expParameters.modality, expParameters.fileName.events), ...
+        logFile.fileID = fopen(...
+            fullfile(...
+            expParameters.outputDir, ...
+            expParameters.modality, ...
+            expParameters.fileName.events), ...
             'w');
         
         % print the basic BIDS columns
@@ -58,9 +61,9 @@ switch input
                 end
                 
                 if ischar(data)
-                    fprintf(logFile(1).eventLogFile, '%s\t', data);
+                    fprintf(logFile(1).fileID, '%s\t', data);
                 else
-                    fprintf(logFile(1).eventLogFile, '%f\t', data);
+                    fprintf(logFile(1).fileID, '%f\t', data);
                 end
                 
             end

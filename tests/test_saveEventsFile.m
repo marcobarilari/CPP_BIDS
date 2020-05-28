@@ -12,23 +12,28 @@ expParameters.task = 'testtask';
 cfg.eyeTracker = false;
 cfg.device = 'scanner';
 
+outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
+
+expParameters.outputDir = outputDir;
 expParameters = checkCFG(cfg,expParameters);
 expParameters = createFilename(cfg,expParameters);
 
 
 
-%% create the file
+%% create the events and stim files
 
 logFile = saveEventsFile('open', expParameters, [], 'Speed', 'is_Fixation');
 
+stimFile = saveEventsFile('open_stim', expParameters, []);
 
 % ---- test section
 
 fileName = fullfile(expParameters.outputDir, expParameters.modality, expParameters.fileName.events);
+stimFileName = fullfile(expParameters.outputDir, expParameters.modality, expParameters.fileName.stim);
 
 % check that the file has the right path and name
 assert(exist(fileName, 'file')==2)
-
+assert(exist(stimFileName, 'file')==2)
 
 
 %%  write things in it
@@ -40,7 +45,6 @@ logFile(1).speed = [];
 logFile(1).is_fixation = 'true';
 
 saveEventsFile('save', expParameters, logFile, 'speed', 'is_fixation');
-
 
 logFile(1,1).onset = 2;
 logFile(1,1).trial_type = 'motion_up';
