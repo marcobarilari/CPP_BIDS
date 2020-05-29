@@ -1,2 +1,12 @@
 
 createFilename.m~
+
+*.m~
+*octave-workspace
+
+# exclude content of logfiles folders
+*.tsv
+*.mat
+
+check_my_code_report.txt
+test_code_report.txt
