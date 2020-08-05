@@ -1,86 +1,168 @@
-function test_createFilename()
-% test for filename creation and their directories
+function test_suite = test_createFilename %#ok<*STOUT>
+    try % assignment of 'localfunctions' is necessary in Matlab >= 2016
+        test_functions = localfunctions(); %#ok<*NASGU>
+    catch % no problem; early Matlab versions can use initTestSuite fine
+    end
+    initTestSuite;
+end
 
-%% check directory and filename creation (PC)
+function test_createFilenameBasic()
 
-%%% set up part
+    outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
 
-expParameters.subjectGrp = '';
-expParameters.subjectNb = 1;
-expParameters.sessionNb = 1;
-expParameters.runNb = 1;
-expParameters.task = 'testtask';
+    %% set up
 
-cfg.eyeTracker = false;
-cfg.device = 'PC';
+    cfg.verbose = false;
+    cfg.subject.subjectNb = 1;
+    cfg.subject.runNb = 1;
+    cfg.task.name = 'test task';
+    cfg.dir.output = outputDir;
 
-% set up the output directories
-outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
-expParameters.outputDir = outputDir;
+    cfg = createFilename(cfg);
 
-behDir = fullfile(outputDir, 'source', 'sub-001', 'ses-001', 'beh');
-eyetrackerDir = fullfile(outputDir, 'source', 'sub-001', 'ses-001', 'eyetracker');
+    %% data to test against
+    behDir = fullfile(outputDir, 'source', 'sub-001', 'ses-001', 'beh');
 
-expParameters = checkCFG(cfg,expParameters);
-expParameters = createFilename(cfg,expParameters);
+    eyetrackerDir = fullfile(outputDir, 'source', 'sub-001', 'ses-001', 'eyetracker');
 
-%%% test part
+    eventFilename = ['sub-001_ses-001_task-testTask_run-001_events_date-'...
+        cfg.fileName.date '.tsv'];
 
-% make sure the beh dir is created
-assert(exist(behDir, 'dir')==7)
+    stimFilename =  ['sub-001_ses-001_task-testTask_run-001_stim_date-'...
+        cfg.fileName.date '.tsv'];
 
-% make sure the eyetracker dir is not created
-assert(exist(eyetrackerDir, 'dir')==0)
+    %% test
 
-% make sure the events filename is created
-assert(strcmp(...
-    expParameters.fileName.events, ...
-    ['sub-001_ses-001_task-testtask_run-001_events_date-' expParameters.date '.tsv']));
+    % make sure the beh dir is created
+    assertTrue(exist(behDir, 'dir') == 7);
 
-% make sure the stim filename is created
-assert(strcmp(...
-    expParameters.fileName.stim, ...
-    ['sub-001_ses-001_task-testtask_run-001_stim_date-' expParameters.date '.tsv']));
+    % make sure the eyetracker dir is not created
+    assertTrue(exist(eyetrackerDir, 'dir') == 0);
 
-%% check directory and filename creation (fMRI and eye tracker)
+    % make sure the events filename is created
+    assertEqual(cfg.fileName.events, eventFilename);
 
-clear
+    % make sure the stim filename is created
+    assertEqual(cfg.fileName.stim, stimFilename);
 
-%%% set up part
+end
 
-expParameters.subjectGrp = 'ctrl';
-expParameters.subjectNb = 2;
-expParameters.sessionNb = 2;
-expParameters.runNb = 2;
-expParameters.task = 'testtask';
+function test_createFilenameMriEyetracker()
 
-cfg.eyeTracker = true;
-cfg.device = 'scanner';
+    outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
 
-outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
+    %% set up
 
-funcDir = fullfile(outputDir, 'source', 'sub-ctrl002', 'ses-002', 'func');
-eyetrackerDir = fullfile(outputDir, 'source', 'sub-ctrl002', 'ses-002', 'eyetracker');
+    cfg.verbose = false;
+    cfg.subject.subjectGrp = 'ctrl';
+    cfg.subject.subjectNb = 2;
+    cfg.subject.sessionNb = 2;
+    cfg.subject.runNb = 2;
+    cfg.task.name = 'test task';
+    cfg.dir.output = outputDir;
 
-expParameters.outputDir = outputDir;
-expParameters = checkCFG(cfg,expParameters);
-expParameters = createFilename(cfg,expParameters);
+    cfg.eyeTracker.do = true;
+    cfg.testingDevice = 'mri';
 
-%%% test part
+    cfg = createFilename(cfg);
 
-% make sure the func dir is created
-assert(exist(funcDir, 'dir')==7)
+    %% data to test against
 
-% make sure the eyetracker dir is created
-assert(exist(eyetrackerDir, 'dir')==7)
+    funcDir = fullfile(outputDir, 'source', 'sub-ctrl002', 'ses-002', 'func');
 
-% make sure the events filename is created
-assert(strcmp(expParameters.fileName.base, 'sub-ctrl002_ses-002_task-testtask'))
-assert(strcmp(...
-    expParameters.fileName.events, ...
-    ['sub-ctrl002_ses-002_task-testtask_run-002_events_date-' expParameters.date '.tsv']));
+    eyetrackerDir = fullfile(outputDir, 'source', 'sub-ctrl002', 'ses-002', 'eyetracker');
 
-% make sure the eyetracker filename is created
-assert(strcmp(...
-    expParameters.fileName.eyetracker, ...
-    ['sub-ctrl002_ses-002_task-testtask_run-002_eyetrack_date-' expParameters.date '.edf']));
+    baseFilename = 'sub-ctrl002_ses-002_task-testTask';
+
+    eventFilename = ['sub-ctrl002_ses-002_task-testTask_run-002_events_date-' ...
+        cfg.fileName.date '.tsv'];
+
+    eyetrackerFilename =  ['sub-ctrl002_ses-002_task-testTask_run-002_eyetrack_date-' ...
+        cfg.fileName.date '.edf'];
+
+    %% tests
+    % make sure the func dir is created
+    assertTrue(exist(funcDir, 'dir') == 7);
+
+    % make sure the eyetracker dir is created
+    assertTrue(exist(eyetrackerDir, 'dir') == 7);
+
+    % make sure the right filenames are created
+    assertEqual(cfg.fileName.base, baseFilename);
+    assertEqual(cfg.fileName.events, eventFilename);
+    assertEqual(cfg.fileName.eyetracker, eyetrackerFilename);
+
+end
+
+function test_createFilenameMriSuffix()
+
+    outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
+
+    %% set up
+
+    cfg.verbose = false;
+    cfg.subject.subjectGrp = 'ssri';
+    cfg.subject.subjectNb = 3;
+    cfg.subject.sessionNb = 4;
+    cfg.subject.runNb = 5;
+    cfg.task.name = 'rest';
+    cfg.dir.output = outputDir;
+
+    cfg.eyeTracker.do = false;
+    cfg.testingDevice = 'mri';
+
+    cfg.mri.reconstruction = 'fast recon';
+    cfg.mri.contrastEnhancement = 'test';
+    cfg.mri.phaseEncodingDirection = 'y pos';
+    cfg.mri.echo = '1';
+    cfg.mri.acquisition = ' new tYpe';
+
+    cfg = createFilename(cfg);
+
+    %% data to test against
+
+    funcDir = fullfile(outputDir, 'source', 'sub-ssri003', 'ses-004', 'func');
+
+    baseFilename = 'sub-ssri003_ses-004_task-rest';
+
+    eventFilename = ['sub-ssri003_ses-004_task-rest',  ...
+        '_acq-newTYpe_ce-test_dir-yPos_rec-fastRecon', ...
+        '_run-005_echo-1_events_date-' ...
+        cfg.fileName.date '.tsv'];
+
+    %% tests
+    % make sure the func dir is created
+    assertTrue(exist(funcDir, 'dir') == 7);
+
+    % make sure the right filenames are created
+    assertEqual(cfg.fileName.base, baseFilename);
+    assertEqual(cfg.fileName.events, eventFilename);
+
+end
+
+function test_createFilenameEeg()
+
+    outputDir = fullfile(fileparts(mfilename('fullpath')), '..', 'output');
+
+    %% set up
+
+    cfg.verbose = false;
+    cfg.subject.subjectGrp = 'blind';
+    cfg.subject.subjectNb = 3;
+    cfg.subject.sessionNb = 1;
+    cfg.subject.runNb = 1;
+    cfg.task.name = 'test task';
+    cfg.dir.output = outputDir;
+
+    cfg.testingDevice = 'eeg';
+
+    cfg = createFilename(cfg);
+
+    %% data to test against
+    eegDir = fullfile(outputDir, 'source', 'sub-blind003', 'ses-001', 'eeg');
+
+    %% test
+    % make sure the func dir is created
+    assertTrue(exist(eegDir, 'dir') == 7);
+
+end
