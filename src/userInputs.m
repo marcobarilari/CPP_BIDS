@@ -17,10 +17,9 @@ function cfg = userInputs(cfg)
         cfg.debug.do = false;
     end
 
-    askGrpSess = [true true];
-    if isfield(cfg, 'subject') && ...
-            isfield(cfg.subject, 'askGrpSess') && ...
-            ~isempty(cfg.subject.askGrpSess)
+    cfg = checkCFG(cfg);
+
+    [cfg, responses] = setDefaultResponses(cfg);
 
         askGrpSess = cfg.subject.askGrpSess;
 
@@ -29,24 +28,18 @@ function cfg = userInputs(cfg)
         askGrpSess(2) = 1;
     end
 
-    subjectGrp = '';
-    subjectNb = []; %#ok<*NASGU>
-    sessionNb = [];
-    runNb = [];
+        if cfg.useGUI
 
-    % When in debug more this function returns some dummy values
-    if cfg.debug.do
-        subjectGrp = 'ctrl';
-        subjectNb = 666;
-        runNb = 666;
-        sessionNb = 666;
+            try
+                responses = askUserGui(questions, responses);
+            catch
+                responses = askUserCli(questions, responses);
+            end
 
-        % Otherwise it prompts the user for some information
-    else
+        else
 
-        % subject group
-        if askGrpSess(1)
-            subjectGrp = lower(input('Enter subject group (leave empty if none): ', 's'));
+            responses = askUserCli(questions, responses);
+
         end
 
         % the subject number
